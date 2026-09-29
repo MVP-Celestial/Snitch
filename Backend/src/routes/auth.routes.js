@@ -9,7 +9,7 @@ const router = Router();
 // "Express, here is a function. Run it when someone makes a POST request to /register."
 router.post('/register', validateRegisterUser, register)
 
-router.get('/login', validateLoginUser,login)
+router.post('/login', validateLoginUser,login)
 
 
 export default router

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import {config} from "../config/config.js"
 
 
-async function sendTokenResponse(user, res) {
+async function sendTokenResponse(user, res, message) {
 
     const token = jwt.sign({
         id: user._id,
