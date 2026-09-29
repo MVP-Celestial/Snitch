@@ -19,11 +19,11 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     await handleRegister({
-        email: FormData.email,
-        contact: FormData.contactNumber,
-        password: FormData.password,
-        isSeller: FormData.isSeller,
-        fullname: FormData.fullname
+        email: form.email,
+        contact: form.contactNumber,
+        password: form.password,
+        isSeller: form.isSeller,
+        fullname: form.fullname
     })
     navigate("/")
     console.log('Register form submitted:', form)
