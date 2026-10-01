@@ -86,4 +86,8 @@ export const login = async (req, res) => {
 
 }
 
+export const googleCallback = async (req, res) => {
+    
+}
+
 
