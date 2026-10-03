@@ -134,6 +134,7 @@ function Login() {
             >
               Sign in <span className="text-xl">→</span>
             </button>
+            <a href="/api/auth/google">Continue with google</a>
           </form>
         </section>
       </div>
