@@ -32,7 +32,7 @@ export  const config = {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     NODE_ENV: process.env.NODE_ENV || "development",
-    IMAGEKIT_API_KEY: process.env.IMAGEKIT_API_KEY || "private_99O2IH9rPgkZXHIV7yzq5e0Zt5M="
+    IMAGEKIT_API_KEY: process.env.IMAGEKIT_API_KEY 
 }
 
 export default config
