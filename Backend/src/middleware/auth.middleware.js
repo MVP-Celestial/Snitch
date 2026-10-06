@@ -16,7 +16,7 @@ export const authenticateSeller = async (req, res, next) =>{
     try{
         const decoded = jwt.verify(token, config.JWT_SECRET)
 
-        const user = await userModel.findById(decoded.userId)
+        const user = await userModel.findById(decoded.id)
 
         if(user.role !== 'seller'){
             return res.status(403).json({message: "Forbidden"})

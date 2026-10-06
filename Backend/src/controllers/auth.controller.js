@@ -43,7 +43,7 @@ export const register = async (req, res) => {
         })
 
         if(existingUser) {
-            return res.status(400).json({message: "user with this email or conatct already exists"})
+            return res.status(400).json({message: "An account with this email or contact number already exists. Please sign in or use different details."})
         }
 
         const user = await userModel.create({

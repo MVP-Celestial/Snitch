@@ -18,6 +18,11 @@ export const validateRegisterUser = [
     body("email")
     .isEmail().withMessage("Invalid email format"),
     body("contact")
+    .customSanitizer((value) => {
+        if (typeof value !== "string") return value;
+        const contact = value.trim().replace(/[\s()-]/g, "");
+        return /^\+91\d{10}$/.test(contact) ? contact.slice(3) : contact;
+    })
     .notEmpty().withMessage("Contact is required")
     .matches(/^\d{10}$/).withMessage("Contact must be a 10-digit number"),
     body("password")
