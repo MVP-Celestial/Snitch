@@ -19,6 +19,8 @@ function Register() {
     isSeller: false,
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = ({ target }) => {
     setForm((current) => ({
@@ -29,14 +31,28 @@ function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    await handleRegister({
-      fullname: form.fullname,
-      contact: form.contactNumber,
-      email: form.email,
-      password: form.password,
-      isSeller: form.isSeller,
-    })
-    navigate('/')
+    if (isSubmitting) return
+    setError('')
+    setIsSubmitting(true)
+    try {
+      await handleRegister({
+        fullname: form.fullname.trim(),
+        contact: form.contactNumber,
+        email: form.email.trim(),
+        password: form.password,
+        isSeller: form.isSeller,
+      })
+      navigate('/')
+    } catch (error) {
+      const response = error.response?.data
+      const validationMessages = response?.errors?.map((item) => item.msg).filter(Boolean)
+      setError(
+        response?.message || validationMessages?.join(' ') ||
+          'Unable to create your account. Please try again.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -102,6 +118,7 @@ function Register() {
                   value={form.fullname}
                   onChange={handleChange}
                   placeholder="Your name"
+                  minLength={3}
                   required
                 />
               </label>
@@ -115,8 +132,10 @@ function Register() {
                   value={form.contactNumber}
                   onChange={handleChange}
                   placeholder="+91 00000 00000"
+                  title="Enter a 10-digit contact number, optionally prefixed with +91."
                   required
                 />
+                <small className="font-normal tracking-normal">10 digits, optionally prefixed with +91.</small>
               </label>
             </div>
 
@@ -183,11 +202,14 @@ function Register() {
               </span>
             </label>
 
+            {error && <p role="alert" className="m-0 text-sm text-red-700">{error}</p>}
+
             <button
               className="mt-1 flex items-center justify-between border-0 bg-[#c66d55] px-5 py-4 text-[13px] font-semibold text-[#fffaf5] hover:bg-[#a95440]"
               type="submit"
+              disabled={isSubmitting}
             >
-              Create account <span className="text-xl">↗</span>
+              {isSubmitting ? 'Creating account…' : 'Create account'} <span className="text-xl">↗</span>
             </button>
 
             <a href="/api/auth/google">Continue with google</a>
