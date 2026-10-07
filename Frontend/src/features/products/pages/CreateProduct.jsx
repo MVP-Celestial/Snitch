@@ -1,9 +1,26 @@
-import  { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { useProduct } from "../hooks/useProduct.js";
-import { ImagePlus, X, PackagePlus } from "lucide-react";
+import { Check, ImagePlus, LoaderCircle, X, PackagePlus } from "lucide-react";
 
 const CreateProduct = () => {
   const { handleCreateProduct } = useProduct();
+  const navigate = useNavigate();
+  const successDialog = useRef(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreated, setIsCreated] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    if (!isCreated) return;
+
+    if (!successDialog.current.open) successDialog.current.showModal();
+    const redirectTimer = setTimeout(() => {
+      navigate("/seller/dashboard", { replace: true });
+    }, 2000);
+
+    return () => clearTimeout(redirectTimer);
+  }, [isCreated, navigate]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -58,8 +75,11 @@ const CreateProduct = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setSubmitError("");
 
     const productData = new FormData();
 
@@ -72,7 +92,17 @@ const CreateProduct = () => {
       productData.append("images", image);
     });
 
-    handleCreateProduct(productData);
+    try {
+      await handleCreateProduct(productData);
+      setIsCreated(true);
+    } catch (error) {
+      setSubmitError(
+        typeof error.response?.data?.message === "string"
+          ? error.response.data.message
+          : "We couldn't create your product. Please try again."
+      );
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,6 +126,7 @@ const CreateProduct = () => {
 
         <form
           onSubmit={handleSubmit}
+          aria-busy={isSubmitting}
           className="grid gap-6 lg:grid-cols-[1fr_340px]"
         >
           {/* LEFT SIDE */}
@@ -349,17 +380,48 @@ const CreateProduct = () => {
                 creating the product.
               </p>
 
+              {submitError && (
+                <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {submitError}
+                </p>
+              )}
+
               <button
                 type="submit"
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-[0.98]"
+                disabled={isSubmitting}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <PackagePlus size={17} />
-                Create product
+                {isSubmitting ? <LoaderCircle size={17} className="animate-spin motion-reduce:animate-none" /> : <PackagePlus size={17} />}
+                {isCreated ? "Product created" : isSubmitting ? "Creating product..." : "Create product"}
               </button>
             </div>
           </div>
         </form>
       </div>
+      <dialog
+        ref={successDialog}
+        aria-labelledby="product-created-title"
+        aria-describedby="product-created-description"
+        onClose={() => navigate("/seller/dashboard", { replace: true })}
+        className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-neutral-200 bg-[#fffefa] p-8 text-center shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      >
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#eeeede] text-[#5c6947]">
+          <Check size={28} aria-hidden="true" />
+        </div>
+        <h2 id="product-created-title" className="text-2xl font-semibold tracking-tight text-neutral-900">
+          Product created!
+        </h2>
+        <p id="product-created-description" className="mt-3 text-sm leading-6 text-neutral-500">
+          Your product has been added. Taking you to My products...
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate("/seller/dashboard", { replace: true })}
+          className="mt-6 w-full rounded-xl bg-neutral-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-900"
+        >
+          Go to My products
+        </button>
+      </dialog>
     </div>
   );
 };

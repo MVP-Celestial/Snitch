@@ -13,8 +13,8 @@ export async function createProduct(formData) {
 }
 
 
-export async function getSellerProduct() {
-    const response = await productApiInstance.get("/seller")
+export async function getSellerProduct(signal) {
+    const response = await productApiInstance.get("/seller", { signal })
 
     return response.data
 }
