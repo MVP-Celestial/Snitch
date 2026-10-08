@@ -123,3 +123,18 @@ export const googleCallback = async (req, res) => {
 }// this controller deals with if a user has never registed and clicked on continue with google then first register the user and if user is already register then login the user
 
 
+export const getMe = async (req, res) => {
+    const user = req.user
+
+    res.status(200).json({
+        message: "User fetched successfully",
+        success: true,
+        user: {
+            id: user._id,
+            email: user.email,
+            contact: user.contact,
+            fullname: user.fullname,
+            role: user.role
+        }
+    })
+}

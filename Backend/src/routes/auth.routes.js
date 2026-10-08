@@ -3,7 +3,8 @@ import {validateRegisterUser, validateLoginUser} from "../validator/auth.validat
 import { register, login, googleCallback } from "../controllers/auth.controller.js";
 import passport from "passport";
 import {config} from "../config/config.js"
-
+import { authenticateUser } from "../middleware/auth.middleware.js";
+import { getMe } from "../controllers/user.controller.js";
 
 const router = Router();
 
@@ -20,6 +21,14 @@ router.get(
   passport.authenticate('google', { session: false, failureRedirect: config.NODE_ENV === "development" ? "http://localhost:5173/login" : "/login"  }), // responsible for taking the authcode from server to google and bring userdata from google in exchange of authcode
   googleCallback
 );
+
+/**
+ * @route GET /auth/me
+ * @desc Get the authenticated user's information
+ * @access Private
+ */
+
+router.get('/me',authenticateUser,getMe )
 
 
 export default router
