@@ -4,7 +4,7 @@ const authSlice = createSlice({
     name: "auth",      //pocket
     initialState: {
         user:null,
-        loading: false,
+        loading: true,
         error: null,
     },
     reducers: {  //tools to change whats inside the pocket
