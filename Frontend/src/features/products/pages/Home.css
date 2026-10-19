@@ -9,6 +9,63 @@
 .home-header nav { display: flex; gap: 32px; font-size: 12px; align-items: center; }
 .home-header nav a, .home-footer > a:last-child { display: inline-flex; align-items: center; gap: 9px; }
 .home-header nav a:hover, .home-footer > a:last-child:hover { color: #a45030; }
+@property --snitch-sign-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: true;
+}
+.home-header nav .home-sign-in {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  justify-content: center;
+  min-width: 102px;
+  min-height: 44px;
+  padding: 12px 20px;
+  border: 2px solid #171717;
+  border-radius: 999px;
+  background: #000;
+  color: #f5f5f5;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -.2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 18px -12px #ffffff50;
+  transition: border-color .4s ease, box-shadow .4s ease, background-color .4s ease;
+  animation: sign-border-orbit 3.5s linear infinite;
+}
+.home-sign-in::before, .home-sign-in::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--snitch-sign-angle), transparent 0deg 210deg, #ffffff08 240deg, #ffffff38 275deg, #ffffffb3 305deg, #ffffff60 325deg, transparent 355deg 360deg);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: .85;
+  transition: opacity .4s ease;
+}
+.home-sign-in::after { filter: blur(10px); opacity: .45; z-index: -1; }
+.home-header nav .home-sign-in:is(:hover, :focus-visible) {
+  color: #fff;
+  background: #000;
+  border-color: #808080;
+  box-shadow: 0 0 28px -10px #ffffff66;
+}
+.home-sign-in:is(:hover, :focus-visible)::before { opacity: 1; }
+.home-sign-in:is(:hover, :focus-visible)::after { opacity: .85; }
+.home-header nav .home-sign-in:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+@keyframes sign-border-orbit { to { --snitch-sign-angle: 360deg; } }
+@media (max-width: 700px) {
+  .home-header nav .home-sign-in { min-width: 94px; padding: 12px 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-header nav .home-sign-in { animation: none; --snitch-sign-angle: 45deg; }
+  .home-header nav .home-sign-in, .home-sign-in::before, .home-sign-in::after { transition: none; }
+}
 .home-main { max-width: 1440px; margin: auto; padding: 0 6% 80px; }
 .home-hero { display: flex; align-items: center; justify-content: space-between; padding: 66px 0 58px; gap: 32px; }
 .home-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; color: #757967; margin: 0 0 17px; }

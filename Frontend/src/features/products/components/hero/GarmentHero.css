@@ -1,0 +1,53 @@
+/* A quiet, full-bleed black studio. Shopping controls remain outside the canvas. */
+.shop-home .home-main { max-width: none; padding: 0 0 80px; display: grid; grid-template-columns: minmax(0, 1fr); }
+.shop-home .home-header { max-width: none; background: #000; color: #f5f5f2; border-bottom: 0; }
+.shop-home .home-announcement { background: #000; color: #929292; }
+.shop-home .home-collection { width: 88%; min-width: 0; max-width: 1268px; margin-inline: auto; }
+.shop-home .home-hero { display: flex; flex-direction: column; justify-content: flex-end; position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; min-height: max(640px, calc(100svh - 118px)); padding: 40px 6%; margin: 0 0 40px; background: #000; color: #f5f5f2; overflow: hidden; }
+.shop-home .home-hero .studio-title { position: absolute; inset: 19% 6% auto; margin: 0; font-family: 'DM Sans', sans-serif; font-size: clamp(68px, 9.9vw, 180px); font-weight: 500; line-height: .96; letter-spacing: -.07em; text-transform: uppercase; pointer-events: none; z-index: 0; }
+.studio-title span { display: block; white-space: nowrap; }
+.studio-title span:last-child { text-align: right; margin-top: .4em; }
+.garment-stage { position: absolute; z-index: 1; inset: 0 0 17%; }
+.garment-ground { position: absolute; left: 37%; bottom: 8%; width: 26%; height: 5%; background: #000; filter: blur(20px); border-radius: 50%; }
+.garment-posters { position: absolute; inset: 0; }
+.garment-preview { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: transform 1.4s cubic-bezier(.2,.7,.2,1), opacity 1.4s; pointer-events: none; }
+.garment-preview img { height: 100%; width: min(57vw, 620px); object-fit: contain; filter: drop-shadow(0 18px 24px #0009); animation: studio-enter 1.2s cubic-bezier(.16,1,.3,1) both; }
+.garment-preview.slot-0 { z-index: 3; transform: translate(0, 0) scale(1); opacity: 1; }
+.garment-preview.slot-1 { z-index: 1; transform: translate(33%, 3%) scale(.5); opacity: .06; }
+.garment-preview.slot-2 { z-index: 1; transform: translate(-33%, 3%) scale(.5); opacity: .06; }
+.is-ready .garment-posters { visibility: hidden; }
+.garment-canvas { position: absolute; inset: 0; animation: studio-fade .5s ease-out both; }
+.garment-canvas canvas { touch-action: pan-y !important; cursor: grab; }
+.garment-canvas canvas:active { cursor: grabbing; }
+.garment-status { position: absolute; bottom: 10%; left: 20%; right: 20%; font-size: 11px; text-align: center; background: #000; color: #aaa; padding: 10px; z-index: 5; }
+.studio-bottom { position: relative; z-index: 3; display: flex; justify-content: space-between; gap: 24px; align-items: end; pointer-events: none; }
+.studio-bottom a { pointer-events: auto; }
+.studio-intro p { font-size: 12px; line-height: 1.8; color: #939393; margin: 0 0 16px; }
+.shop-home .home-hero .home-shop-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 32px; border: 1px solid #454545; border-radius: 999px; background: #000; color: #f5f5f2; padding: 16px 23px; font-size: 12px; font-weight: 500; transition: border-color .2s, background .2s; }
+.shop-home .home-hero .home-shop-link:hover { background: #141414; border-color: #aaa; }
+.shop-home .home-hero :is(button,a):focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+.studio-scroll { display: inline-flex; align-items: center; gap: 16px; font-size: 8px; letter-spacing: 1.6px; min-height: 44px; color: #939393; }
+/* Available to keyboard users without adding permanent visual controls. */
+.studio-motion-toggle { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.studio-motion-toggle:focus-visible { inset: 18px auto auto 6%; width: auto; height: auto; margin: 0; padding: 12px 18px; clip-path: none; background: #000; color: #fff; border: 1px solid #777; z-index: 5; }
+@keyframes studio-enter { from { opacity: 0; transform: translateY(50px) scale(.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes studio-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 1600px) { .shop-home .home-hero .studio-title { inset-inline: calc((100% - 1440px) / 2); font-size: 160px; } }
+@media (max-width: 700px) {
+  .shop-home .home-main { padding-bottom: 50px; }
+  .shop-home .home-collection { width: 90%; }
+  .shop-home .home-hero { margin: 0 0 28px; padding: 28px 5%; min-height: max(620px, calc(100svh - 110px)); }
+  .shop-home .home-hero .studio-title { top: 20%; inset-inline: 5%; font-size: 10.3vw; line-height: 1; }
+  .studio-title span:last-child { margin-top: 2.5em; }
+  .garment-stage { inset: 4% 0 20%; }
+  .garment-preview img { width: 92vw; height: 100%; }
+  .garment-preview.slot-1 { transform: translate(40%, 2%) scale(.5); opacity: .04; }
+  .garment-preview.slot-2 { transform: translate(-40%, 2%) scale(.5); opacity: .04; }
+  .studio-intro p { font-size: 11px; }
+  .studio-scroll { font-size: 0; gap: 0; }
+  .garment-status { left: 5%; right: 5%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garment-preview, .shop-home .home-hero .home-shop-link { transition: none; }
+  .garment-preview img, .garment-canvas { animation: none; }
+}

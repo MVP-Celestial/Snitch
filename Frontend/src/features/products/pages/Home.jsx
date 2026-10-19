@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
-import { ArrowDown, ArrowUpRight, ImageIcon, Package, RefreshCw, Search, X } from 'lucide-react'
+import { ArrowUpRight, ImageIcon, Package, RefreshCw, Search, X } from 'lucide-react'
+import GarmentHero from '../components/hero/GarmentHero'
 import { useProduct } from '../hooks/useProduct'
 import './Home.css'
 
@@ -82,24 +83,17 @@ export default function Home() {
 
   return (
     <div className="shop-home">
-      <div className="home-announcement">A little discovery. A new favourite.</div>
+
       <header className="home-header">
         <Link to="/" className="home-brand" aria-label="Snitch home">snitch<span>.</span></Link>
         <nav aria-label="Main navigation">
           <a href="#collection" className="home-nav-shop">Shop collection</a>
           {user?.role === 'seller' ? <Link to="/seller/dashboard">Seller dashboard<ArrowUpRight size={15} aria-hidden="true" /></Link>
-            : !user && <Link to="/login">Sign in<ArrowUpRight size={15} aria-hidden="true" /></Link>}
+            : !user && <Link to="/login" className="home-sign-in">Sign in</Link>}
         </nav>
       </header>
       <main className="home-main">
-        <section className="home-hero" aria-labelledby="home-title">
-          <div><p className="home-eyebrow">THE EVERYDAY, REIMAGINED</p>
-            <h1 id="home-title">Find your next<br /><em>favourite.</em></h1>
-            <p className="home-hero-description">Fresh finds. Everyday essentials. Explore the collection<br /> and discover something that feels like you.</p>
-            <a href="#collection" className="home-shop-link">Explore the collection <ArrowDown size={16} aria-hidden="true" /></a>
-          </div>
-          <div className="home-hero-note" aria-hidden="true"><span>✳</span><p>GOOD FINDS.<br />GREAT POSSIBILITIES.</p><small>Make room for something new.</small></div>
-        </section>
+        <GarmentHero />
         <section id="collection" className="home-collection" aria-labelledby="home-collection-title" aria-busy={status === 'loading'}>
           <div className="home-collection-heading"><div><p className="home-eyebrow">DISCOVER SOMETHING YOU LOVE</p><h2 id="home-collection-title">The collection<span>{status === 'ready' ? products.length : '…'}</span></h2></div><p>A fresh perspective on the everyday.</p></div>
           <div className="home-toolbar">
