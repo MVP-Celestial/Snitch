@@ -19,10 +19,11 @@ export const useProduct = () => {
     }, [dispatch])
 
 
-    async function handleGetAllProducts() {
-       const data = await getAllProducts() 
-       dispatch(setProducts(data.products))
-    }
+    const handleGetAllProducts = useCallback(async (signal) => {
+       const data = await getAllProducts(signal)
+       if (!signal?.aborted) dispatch(setProducts(data.products))
+       return data.products
+    }, [dispatch])
 
 
 
