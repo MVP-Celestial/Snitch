@@ -4,12 +4,12 @@ import Login from "../features/auth/pages/Login";
 import CreateProduct from "../features/products/pages/CreateProduct"
 import Dashboard from "../features/products/pages/Dashboard"
 import Protected from "../features/auth/components/Protected";
-
+import Home from "../features/products/pages/Home";
 export const routes = createBrowserRouter([
 
     {
         path: "/",
-        element: <h1>Hello world</h1>,
+        element: <Home/>
     },
     {
         path: "/register",
@@ -24,11 +24,13 @@ export const routes = createBrowserRouter([
         children: [
             {
               path: "/seller/create-product",
-              element:<Protected><CreateProduct/></Protected>  
+              element:<Protected
+              role="seller"
+              ><CreateProduct/></Protected>  
             },
             {
                 path: "/seller/dashboard",
-                element: <Dashboard/>
+                element: <Protected role="seller"><Dashboard/></Protected>
             }
         ]
     },

@@ -28,6 +28,14 @@ router.post('/', authenticateSeller,upload.array('images', 7),createProductValid
 
 router.get('/seller',authenticateSeller,getSellerProducts)
 
+/**
+ * @route GET /api/products
+ * @description Get all products
+ * @access Public
+ */
+
+router.get("/", getAllProducts)
+
 
 
 export default router

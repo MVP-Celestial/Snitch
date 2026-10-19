@@ -22,8 +22,14 @@ function Login() {
     event.preventDefault()
     setError('')
     try {
-      await handleLogin(form)
-      navigate('/')
+      const user = await handleLogin(form)
+      if(user.role == "buyer") {
+        navigate('/')
+
+      }else if (user.role == "seller") {
+        navigate("/seller/dashboard")
+
+      }
     } catch {
       setError('We could not sign you in. Please check your details and try again.')
     }

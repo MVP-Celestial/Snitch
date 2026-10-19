@@ -1,10 +1,12 @@
-import { createProduct,getSellerProduct } from "../Services/product.api.js"
+import { createProduct,getSellerProduct, getAllProducts } from "../Services/product.api.js"
 import { useDispatch } from "react-redux"
 import { setSellerProducts } from "../state/product.slice.js"
 import { useCallback } from "react"
+import { setProducts } from "../state/product.slice.js"
 
 export const useProduct = () => {
     const dispatch = useDispatch()
+    
     async function handleCreateProduct(formData) {
         const data = await createProduct(formData)
         return data.product
@@ -15,5 +17,18 @@ export const useProduct = () => {
         if (!signal?.aborted) dispatch(setSellerProducts(data.products))
         return data.products
     }, [dispatch])
-    return { handleCreateProduct, handleGetSellerProduct }
+
+
+    async function handleGetAllProducts() {
+       const data = await getAllProducts() 
+       dispatch(setProducts(data.products))
+    }
+
+
+
+
+
+
+
+    return { handleCreateProduct, handleGetSellerProduct, handleGetAllProducts }
 }
