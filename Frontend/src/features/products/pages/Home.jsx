@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
-import { ArrowUpRight, ImageIcon, Package, RefreshCw, Search, X } from 'lucide-react'
+import { ArrowUpRight, ImageIcon, Package, RefreshCw, Search } from 'lucide-react'
 import GarmentHero from '../components/hero/GarmentHero'
 import { useProduct } from '../hooks/useProduct'
+import { useNavigate } from 'react-router-dom'
 import './Home.css'
 
 const imagesOf = (product) => (product.images || []).map((image) => image.url).filter(Boolean)
@@ -20,48 +21,16 @@ function ProductImage({ src, title }) {
   )
 }
 
-function ProductDetails({ product, onClose }) {
-  const dialog = useRef(null)
-  const [imageIndex, setImageIndex] = useState(0)
-  const images = imagesOf(product)
-
-  useEffect(() => {
-    if (!dialog.current.open) dialog.current.showModal()
-  }, [])
-
-  return (
-    <dialog ref={dialog} className="home-dialog" aria-labelledby="home-product-title" onClose={onClose}
-      onClick={(event) => { if (event.target === event.currentTarget) dialog.current.close() }}>
-      <button type="button" className="home-close" aria-label="Close product details" onClick={() => dialog.current.close()}><X size={20} /></button>
-      <div className="home-detail-layout">
-        <div className="home-detail-image"><ProductImage key={images[imageIndex] || 'empty'} src={images[imageIndex]} title={product.title} /></div>
-        <div className="home-detail-info">
-          <p className="home-eyebrow">THE COLLECTION</p>
-          <h2 id="home-product-title">{product.title}</h2>
-          <p className="home-detail-price">{priceOf(product)} <span>{product.price?.currency || 'INR'}</span></p>
-          <h3>About this product</h3>
-          <p className="home-description">{product.description || 'No description available.'}</p>
-          {images.length > 1 && <div className="home-thumbnails" aria-label="Product images">
-            {images.map((url, index) => <button type="button" key={`${url}-${index}`} aria-label={`Show image ${index + 1}`} aria-pressed={imageIndex === index} onClick={() => setImageIndex(index)}>
-              <ProductImage src={url} title={`${product.title}, image ${index + 1}`} />
-            </button>)}
-          </div>}
-        </div>
-      </div>
-    </dialog>
-  )
-}
-
 export default function Home() {
   const products = useSelector((state) => state.product.products) || []
   const user = useSelector((state) => state.auth.user)
   const { handleGetAllProducts } = useProduct()
+  const navigate = useNavigate()
   const [status, setStatus] = useState('loading')
   const [requestVersion, setRequestVersion] = useState(0)
   const [query, setQuery] = useState('')
   const [currency, setCurrency] = useState('all')
   const [sort, setSort] = useState('latest')
-  const [selectedProduct, setSelectedProduct] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -107,7 +76,7 @@ export default function Home() {
             <p className="home-result-count" role="status">{visibleProducts.length} {visibleProducts.length === 1 ? 'product' : 'products'}{query.trim() ? ` matching “${query.trim()}”` : ' to discover'}</p>
             {visibleProducts.length ? <div className="home-grid">{visibleProducts.map((product) => (
               <article className="home-card" key={product._id}>
-                <button type="button" className="home-card-button" aria-label={`View ${product.title}`} onClick={() => setSelectedProduct(product)}>
+                <button type="button" className="home-card-button" aria-label={`View ${product.title}`} onClick={() => navigate(`/product/${product._id}`)}>
                   <div className="home-card-image"><ProductImage src={imagesOf(product)[0]} title={product.title} />
                     {imagesOf(product).length > 1 && <span className="home-image-count">{imagesOf(product).length} photos</span>}
                     <span className="home-quick-view">View details <ArrowUpRight size={16} aria-hidden="true" /></span>
@@ -120,7 +89,6 @@ export default function Home() {
         </section>
       </main>
       <footer className="home-footer"><Link to="/" className="home-brand">snitch<span>.</span></Link><p>Find something that feels like you.</p><a href="#collection">Back to collection <ArrowUpRight size={14} aria-hidden="true" /></a></footer>
-      {selectedProduct && <ProductDetails key={selectedProduct._id} product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
     </div>
   )
 }
