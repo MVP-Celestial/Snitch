@@ -8,6 +8,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
+import RackPlants from './RackPlants'
+import StudioFloor from './StudioFloor'
 import { GARMENTS, GARMENT_COUNT, smooth, spring, stackPose } from './rackMotion'
 
 const modelUrl = `${import.meta.env.BASE_URL}models/hero-rack.glb`
@@ -256,7 +258,7 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
     models.railViewport.value = size.width * gl.getPixelRatio()
     models.rail.material.opacity = 1 - smooth(.05, .7, reveal)
     const lightOpacity = models.rail.material.opacity * (lightMode ? 0 : 1)
-    if (floor.current) floor.current.material.uniforms.lightMode.value = lightMode ? 1 : 0
+    if (floor.current) { floor.current.visible = lightMode; floor.current.material.uniforms.lightMode.value = lightMode ? 1 : 0 }
     if (floor.current) floor.current.material.uniforms.opacity.value = 1 - smooth(.02, .65, reveal)
     models.ledUniforms.opacity.value = lightOpacity
     if (led.current) {
@@ -395,6 +397,8 @@ export default function RackCanvas(props) {
       <directionalLight layers-mask={3} position={[3, 1, 2]} intensity={props.lightMode ? .8 : .35} color="#dce5f1" />
       <directionalLight layers-mask={3} position={[1, 2, -2]} intensity={props.lightMode ? .8 : 2.1} color="#ffe2b8" />
       <Suspense fallback={null}><StudioEnvironment lightMode={props.lightMode} /><Rack {...props} /></Suspense>
+      <Suspense fallback={null}><RackPlants input={props.input} lightMode={props.lightMode} /></Suspense>
+      {!props.lightMode && <StudioFloor input={props.input} />}
     </Canvas>
   </div>
 }
