@@ -145,3 +145,20 @@
 }
 @media (max-width: 430px) { .home-nav-shop { display: none !important; } .home-hero-note { display: none; } .home-collection-heading h2 { font-size: 26px; } }
 @media (prefers-reduced-motion: reduce) { .home-card-image img, .home-quick-view { transition: none; } }
+
+.home-brand .celestial-logo { display: block; width: 132px; height: 68px; object-fit: contain; }
+.home-header { min-height: 94px; box-sizing: border-box; padding-block: 12px; }
+.home-theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #37332d; border-radius: 999px; background: transparent; color: inherit; font-size: 12px; }
+.home-theme-toggle:hover { background: #ffffff10; }
+.shop-home[data-theme='light'] { background: #f4efe7; color: #28241e; }
+.shop-home[data-theme='light'] .home-header { background: #f4efe7; color: #171511; }
+.shop-home[data-theme='light'] .home-sign-in { background: transparent; color: #171511; border: 1px solid #aaa197; box-shadow: none; animation: none; }
+.shop-home[data-theme='light'] .home-sign-in::before, .shop-home[data-theme='light'] .home-sign-in::after { display: none; }
+.shop-home[data-theme='light'] .home-theme-toggle { border-color: #b6ada1; }
+.shop-home[data-theme='light'] .home-theme-toggle:hover { background: #00000008; }
+@media(max-width: 700px) {
+  .home-brand .celestial-logo { width: 104px; height: 56px; }
+  .home-header nav { gap: 10px; }
+  .home-theme-toggle { padding: 0 10px; }
+  .home-theme-toggle span { display: none; }
+}

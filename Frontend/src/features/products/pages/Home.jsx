@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
-import { ArrowUpRight, ImageIcon, Package, RefreshCw, Search } from 'lucide-react'
+import { ArrowUpRight, ImageIcon, Package, RefreshCw, Search, Sun, Moon } from 'lucide-react'
 import GarmentHero from '../components/hero/GarmentHero'
 import { useProduct } from '../hooks/useProduct'
 import { useNavigate } from 'react-router-dom'
@@ -22,6 +22,12 @@ function ProductImage({ src, title }) {
 }
 
 export default function Home() {
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('celestial-theme') === 'light' ? 'light' : 'dark' } catch { return 'dark' }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('celestial-theme', theme) } catch { /* Storage can be unavailable. */ }
+  }, [theme])
   const products = useSelector((state) => state.product.products) || []
   const user = useSelector((state) => state.auth.user)
   const { handleGetAllProducts } = useProduct()
@@ -51,18 +57,22 @@ export default function Home() {
     : (b._id || '').localeCompare(a._id || ''))
 
   return (
-    <div className="shop-home">
+    <div className="shop-home" data-theme={theme}>
 
       <header className="home-header">
-        <Link to="/" className="home-brand" aria-label="Snitch home">snitch<span>.</span></Link>
+        <Link to="/" className="home-brand" aria-label="Celestial Drips home"><img className="celestial-logo" src={`${import.meta.env.BASE_URL}images/celestial-drips.png`} alt="Celestial Drips" /></Link>
         <nav aria-label="Main navigation">
+          <button type="button" className="home-theme-toggle" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'light'} onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
           <a href="#collection" className="home-nav-shop">Shop collection</a>
           {user?.role === 'seller' ? <Link to="/seller/dashboard">Seller dashboard<ArrowUpRight size={15} aria-hidden="true" /></Link>
             : !user && <Link to="/login" className="home-sign-in">Sign in</Link>}
         </nav>
       </header>
       <main className="home-main">
-        <GarmentHero />
+        <GarmentHero lightMode={theme === 'light'} />
         <section id="collection" className="home-collection" aria-labelledby="home-collection-title" aria-busy={status === 'loading'}>
           <div className="home-collection-heading"><div><p className="home-eyebrow">DISCOVER SOMETHING YOU LOVE</p><h2 id="home-collection-title">The collection<span>{status === 'ready' ? products.length : '…'}</span></h2></div><p>A fresh perspective on the everyday.</p></div>
           <div className="home-toolbar">
@@ -88,7 +98,7 @@ export default function Home() {
           </>}
         </section>
       </main>
-      <footer className="home-footer"><Link to="/" className="home-brand">snitch<span>.</span></Link><p>Find something that feels like you.</p><a href="#collection">Back to collection <ArrowUpRight size={14} aria-hidden="true" /></a></footer>
+      <footer className="home-footer"><Link to="/" className="home-brand"><img className="celestial-logo" src={`${import.meta.env.BASE_URL}images/celestial-drips.png`} alt="Celestial Drips" /></Link><p>Find something that feels like you.</p><a href="#collection">Back to collection <ArrowUpRight size={14} aria-hidden="true" /></a></footer>
     </div>
   )
 }

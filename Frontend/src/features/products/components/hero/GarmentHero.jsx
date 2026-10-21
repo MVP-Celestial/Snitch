@@ -1,11 +1,10 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, RotateCcw, X } from 'lucide-react'
-import { clampIndex, dragPosition, releaseIndex } from './rackMotion'
+import { ArrowLeft, ArrowRight, X } from 'lucide-react'
+import { GARMENTS, GARMENT_COUNT, INITIAL_GARMENT, clampIndex, dragPosition, releaseIndex } from './rackMotion'
 import './GarmentHero.css'
 
 const RackCanvas = lazy(() => import('./RackCanvas'))
-const variants = ['Chalk', 'Olive', 'Slate', 'Charcoal', 'Sand', 'Forest', 'Clay']
-const swatches = ['#d7d2c4', '#7b8860', '#637c8a', '#41464b', '#b69b76', '#356b50', '#b5755c']
+const variants = GARMENTS.map((garment) => garment.name)
 const query = '(prefers-reduced-motion: reduce)'
 const subscribe = (cb) => { const m = window.matchMedia(query); m.addEventListener('change', cb); return () => m.removeEventListener('change', cb) }
 class ViewerBoundary extends Component {
@@ -15,15 +14,15 @@ class ViewerBoundary extends Component {
   render() { return this.state.failed ? null : this.props.children }
 }
 
-export default function GarmentHero() {
+export default function GarmentHero({ lightMode = false }) {
   const stage = useRef(null), gesture = useRef(null)
   const input = useRef({
-    slide: { value: 3, velocity: 0 }, target: 3, dragging: false,
+    slide: { value: INITIAL_GARMENT, velocity: 0 }, target: INITIAL_GARMENT, dragging: false,
     turn: { value: 0, velocity: 0 }, turnTarget: 0, spinning: false,
     pull: 0, drop: { value: 0, velocity: 0 }, suppressClickUntil: 0,
   })
   const wake = useRef(() => {})
-  const [selected, setSelected] = useState(3), [opened, setOpened] = useState(false)
+  const [selected, setSelected] = useState(INITIAL_GARMENT), [opened, setOpened] = useState(false)
   const [ready, setReady] = useState(false), [failed, setFailed] = useState(false)
   const [nearby, setNearby] = useState(false), [active, setActive] = useState(true), [dragging, setDragging] = useState(false)
   const reducedMotion = useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => true)
@@ -49,6 +48,7 @@ export default function GarmentHero() {
     input.current.turnTarget = 0
     input.current.pull = 0
     wake.current()
+    requestAnimationFrame(() => stage.current?.focus({ preventScroll: true }))
   }, [])
   useEffect(() => { const escape = (e) => { if (e.key === 'Escape') close() }; window.addEventListener('keydown', escape); return () => window.removeEventListener('keydown', escape) }, [close])
   const down = (e) => {
@@ -114,28 +114,29 @@ export default function GarmentHero() {
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
     wake.current()
   }
-  return <section className="home-hero rack-hero" aria-labelledby="home-title">
-    <div className="rack-heading"><p className="rack-eyebrow">THE EVERYDAY, RECONSIDERED</p><h1 id="home-title">Find your next favourite.</h1></div>
+  return <section className={`home-hero rack-hero ${opened ? 'is-preview' : ''}`} aria-labelledby={opened ? 'rack-preview-title' : 'home-title'}>
+    <div className="rack-heading" aria-hidden={opened}><h1 id="home-title">Find your next favourite.</h1></div>
     <div ref={stage} className={`rack-stage ${ready ? 'is-ready' : ''} ${dragging ? 'is-dragging' : ''} ${opened ? 'is-open' : ''}`}
-      role="group" aria-label="Interactive clothing rack" tabIndex={0}
+      role="group" aria-label={opened ? 'Shirt preview. Drag to rotate. Press Escape to return.' : 'Clothing rack. Swipe or use arrow keys to browse. Click a shirt or press Enter to preview.'} tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); choose(selected + (e.key === 'ArrowRight' ? 1 : -1)) }
         if (e.key === 'Enter' && ready) setOpened(true)
       }}
       onPointerDown={down} onPointerMove={move} onPointerUp={(e) => end(e)} onPointerCancel={(e) => end(e, true)} onLostPointerCapture={(e) => end(e, true)}>
-      <img className="rack-poster" src={`${import.meta.env.BASE_URL}images/hero-rack-preview.png`} width="1600" height="900" alt="Seven T-shirts hanging from a single chrome clothing rail" fetchPriority="high" />
-      {nearby && !failed && <ViewerBoundary onFailure={onFailure}><Suspense fallback={null}><RackCanvas selected={selected} opened={opened} reducedMotion={reducedMotion} active={active} input={input} wake={wake} onReady={onReady} onFailure={onFailure} onChoose={(i) => { if (i === selected) setOpened(true); else choose(i) }} /></Suspense></ViewerBoundary>}
+      <img className="rack-poster" src={`${import.meta.env.BASE_URL}images/hero-rack-preview.png`} width="1600" height="900" alt="T-shirts hanging from a single chrome clothing rail" fetchPriority="high" />
+      {nearby && !failed && <ViewerBoundary onFailure={onFailure}><Suspense fallback={null}><RackCanvas lightMode={lightMode} selected={selected} opened={opened} reducedMotion={reducedMotion} active={active} input={input} wake={wake} onReady={onReady} onFailure={onFailure} onChoose={(i) => { choose(i); setOpened(true) }} /></Suspense></ViewerBoundary>}
     </div>
     <div className="rack-selection">
       <div className="rack-picker" role="group" aria-label="Browse garment colors">
         <button type="button" className="rack-arrow" aria-label="Previous garment" disabled={selected === 0} onClick={() => choose(selected - 1)}><ArrowLeft size={18} /></button>
-        <div className="rack-caption" aria-live="polite" aria-atomic="true"><p>The everyday tee <span>— {variants[selected]}</span></p><span className="rack-count">0{selected + 1} / 07</span></div>
-        <button type="button" className="rack-arrow" aria-label="Next garment" disabled={selected === 6} onClick={() => choose(selected + 1)}><ArrowRight size={18} /></button>
+        <button type="button" className="rack-arrow" aria-label="Next garment" disabled={selected === GARMENT_COUNT - 1} onClick={() => choose(selected + 1)}><ArrowRight size={18} /></button>
       </div>
-      <div className="rack-swatches" role="group" aria-label="Choose a color">{variants.map((name, i) => <button type="button" key={name} style={{ '--swatch': swatches[i] }} aria-label={name} aria-pressed={selected === i} onClick={() => choose(i)} />)}</div>
-      <p className="rack-hint" role="status">{failed ? 'Preview mode · Browse the collection below' : !ready ? 'Preparing the rack…' : opened ? 'Drag to turn · Pull down or press Escape to return' : 'Swipe through the rack · Tap a tee to lift it'}</p>
-      <div className="rack-actions">{opened ? <><button type="button" className="rack-text-button" onClick={close}><X size={14} /> Back to rack</button><button type="button" className="rack-text-button" onClick={() => { input.current.turnTarget = Math.round(input.current.turn.value / (Math.PI * 2)) * Math.PI * 2; wake.current() }}><RotateCcw size={14} /> Reset view</button></> : <button type="button" className="rack-text-button" disabled={!ready} onClick={() => setOpened(true)}>Take a closer look <ArrowUpRight size={14} /></button>}</div>
     </div>
-    <div className="studio-bottom"><span className="rack-edition">ESSENTIALS / 01</span><a href="#collection" className="home-shop-link">Shop the collection <ArrowUpRight size={17} aria-hidden="true" /></a><a className="studio-scroll" href="#collection">SCROLL TO DISCOVER <ArrowDown size={17} aria-hidden="true" /></a></div>
+    <p className="rack-status" role="status">{failed ? '3D preview unavailable. Browse the collection below.' : !ready ? 'Preparing the rack.' : `The everyday tee, ${variants[selected]}. ${opened ? 'Preview open.' : 'Press Enter on the rack to preview.'}`}</p>
+    <div className="rack-preview-info" aria-hidden={!opened} aria-live="polite">
+      <h2 id="rack-preview-title" key={selected}>The everyday tee</h2>
+      <p>{variants[selected]}</p>
+    </div>
+    {opened && <button type="button" className="rack-preview-close" onClick={close} aria-label="Close shirt preview"><X size={16} /> Close</button>}
   </section>
 }

@@ -113,7 +113,7 @@ export default function Dashboard() {
   return (
     <div className="seller-dashboard">
       <aside className="sd-sidebar">
-        <Link to="/seller/dashboard" className="sd-brand" aria-label="Snitch seller dashboard">snitch<span>.</span></Link>
+        <Link to="/seller/dashboard" className="sd-brand" aria-label="Celestial Drips seller dashboard"><img src={`${import.meta.env.BASE_URL}images/celestial-drips.png`} alt="Celestial Drips" style={{ width: 132, height: 68, objectFit: 'contain' }} /></Link>
         <span className="sd-workspace-label">SELLER WORKSPACE</span>
         <nav aria-label="Seller navigation">
           <a href="#collection" className="sd-nav-link sd-nav-active" aria-current="page"><Package size={18} />My products<span>{ready ? sellerProducts.length : '—'}</span></a>
