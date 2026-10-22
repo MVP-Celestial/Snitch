@@ -48,6 +48,7 @@ function ProductDetails({ product, onClose }) {
               <ProductPhoto src={url} title={`${product.title}, image ${index + 1}`} />
             </button>
           ))}</div>}
+          <Link to={`/seller/product/${product._id}`} className="sd-button sd-button-dark"><Package size={16} />Manage variants &amp; stock<ArrowRight size={16} /></Link>
           <p className="sd-product-id">Product ID <span>{product._id}</span></p>
         </div>
       </div>
