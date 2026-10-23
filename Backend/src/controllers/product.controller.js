@@ -71,3 +71,41 @@ export async function getProductDetails(req, res) {
         product
     })
 }
+
+export async function addProductVariant(req, res) {
+
+    const productId = req.params.productId;
+    const product = await productModel.findOne({
+        _id: productId,
+        seller: req.user._id
+    });
+
+    if(!product) { //chekcs if the product belongs to the same seller who is trying to add or edit variants
+        return res.status(404).json({
+            message: "Product not found",
+            success: false
+        })
+
+    }
+
+
+
+
+    const files = req.files
+    const images = []; //url comes here from image kit(seller-> uploads image frontend -> goes to imagekit -> received in this array)
+    if(files || files.length !== 0) {
+      await Promise.all(files.map(async (file)=> {
+        const image = await uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname
+        })
+        return image
+      })).map(image => images.push(image))  
+    }
+
+    const price = req.body.priceAmount
+    const stock = req.body.stock
+    const attributes = JSON.parse(req.body.attributes || "{}")
+
+    
+}
