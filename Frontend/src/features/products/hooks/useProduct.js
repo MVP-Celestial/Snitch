@@ -4,7 +4,7 @@ import { setSellerProducts } from "../state/product.slice.js"
 import { useCallback } from "react"
 import { setProducts } from "../state/product.slice.js"
 import { getProductById } from "../Services/product.api.js"
-
+import { addProductVariant } from "../Services/product.api.js"
 
 export const useProduct = () => {
     const dispatch = useDispatch()
@@ -33,11 +33,17 @@ export const useProduct = () => {
         return data.product
     }, [])
 
+    async function handleAddProductVariant(productId, newProductVariant) {
+        const data = await addProductVariant(productId, newProductVariant)
+
+        return data
+    }
 
 
 
 
 
 
-    return { handleCreateProduct, handleGetSellerProduct, handleGetAllProducts, handleGetProductById }
+
+    return { handleCreateProduct, handleGetSellerProduct, handleGetAllProducts, handleGetProductById, handleAddProductVariant }
 }
