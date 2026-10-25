@@ -8,7 +8,7 @@ const Cart = () => {
  const cartItems = useSelector((state) => state.cart.items)
  const {handleGetCart} = useCart()
  console.log(cartItems)
-
+ //make sure to use handleIncrementCart Item function 
  useEffect(() => {
     handleGetCart()
  }, [])
