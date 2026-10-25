@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ImageIcon, Moon, RefreshCw, Sun } from 'lucide-react'
 import { useProduct } from '../hooks/useProduct'
 import './Home.css'
+import { useCart } from '../../cart/hook/useCart.js'
 
 const formatPrice = (price) => new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -49,6 +50,7 @@ function ProductGallery({ images, title }) {
 export default function ProductDetail() {
   const { productId } = useParams()
   const { handleGetProductById } = useProduct()
+  const { handleAddItem } = useCart()
   const [result, setResult] = useState(null)
   const [requestVersion, setRequestVersion] = useState(0)
   const [theme, setTheme] = useState(() => {
@@ -58,6 +60,8 @@ export default function ProductDetail() {
       return 'dark'
     }
   })
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [cartMessage, setCartMessage] = useState('')
 
   useEffect(() => {
     try {
@@ -94,6 +98,22 @@ export default function ProductDetail() {
     : 'loading'
   const product = status === 'ready' ? result.product : null
   const images = (product?.images || []).map((image) => image?.url).filter(Boolean)
+  const variantId = product?.variants?.[0]?._id
+
+  const handleAddToCart = async () => {
+    if (!variantId || isAddingToCart) return
+
+    setIsAddingToCart(true)
+    setCartMessage('')
+    try {
+      await handleAddItem({ productId, variantId })
+      setCartMessage('Added to cart.')
+    } catch (error) {
+      setCartMessage(error.response?.data?.message || 'Could not add this product to your cart.')
+    } finally {
+      setIsAddingToCart(false)
+    }
+  }
 
   return (
     <div className="shop-home min-h-screen" data-theme={theme}>
@@ -134,6 +154,15 @@ export default function ProductDetail() {
               <p className="home-eyebrow">CELESTIAL DRIPS · THE COLLECTION</p>
               <h1 id="product-detail-title" className="m-0 text-[clamp(30px,4vw,46px)] font-medium leading-[1.12] tracking-[-1.5px] [overflow-wrap:anywhere] max-[700px]:text-[32px]">{product.title}</h1>
               <p className="my-5 mb-[26px] text-2xl font-medium">{formatPrice(product.price)} <span className="ml-[5px] text-[11px] font-normal text-[#7c8173]">{product.price?.currency || 'INR'}</span></p>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={!variantId || isAddingToCart}
+                className="rounded bg-[#2d3429] px-5 py-3 text-xs text-white hover:bg-[#414a3b] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9b4d2e]"
+              >
+                {isAddingToCart ? 'Adding…' : variantId ? 'Add to cart' : 'Unavailable'}
+              </button>
+              {cartMessage && <p className="mt-2 text-xs text-[#757967]" role="status">{cartMessage}</p>}
               <div className="mb-6 h-px bg-[#dedfd4]" />
               <h2 className="mb-[10px] text-[13px] font-semibold">Product description</h2>
               <p className="m-0 whitespace-pre-wrap text-[13px] leading-[1.9] text-[#757967] [overflow-wrap:anywhere]">{product.description || 'No description is available for this product.'}</p>
