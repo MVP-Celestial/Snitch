@@ -1,19 +1,36 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
-import { HalfFloatType, MathUtils, MeshPhysicalMaterial, PMREMGenerator, Vector4, WebGLRenderTarget } from 'three'
+import { CatmullRomCurve3, ExtrudeGeometry, Group, Mesh, MeshStandardMaterial, Shape, TubeGeometry, Vector3, HalfFloatType, MathUtils, MeshPhysicalMaterial, PMREMGenerator, Vector4, WebGLRenderTarget } from 'three'
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
-import RackPlants from './RackPlants'
-import StudioFloor from './StudioFloor'
+
+
 import { GARMENTS, GARMENT_COUNT, smooth, spring, stackPose } from './rackMotion'
 
 const modelUrl = `${import.meta.env.BASE_URL}models/hero-rack.glb`
 const TAU = Math.PI * 2
+
+function woodenHanger() {
+  const group = new Group()
+  const outline = new Shape()
+  // Render the exposed neck bridge; the concealed shoulder arms must not intersect the fabric.
+  const points = [[0,-.075],[-.11,-.15],[-.10,-.18],[0,-.125],[.10,-.18],[.11,-.15]]
+  outline.moveTo(...points[0]); points.slice(1).forEach(p => outline.lineTo(...p)); outline.closePath()
+  const geometry = new ExtrudeGeometry(outline, { depth:.026, bevelEnabled:true, bevelSegments:3, steps:1, bevelSize:.005, bevelThickness:.004 })
+  geometry.translate(0,0,-.013); geometry.rotateY(Math.PI/2); geometry.scale(.8,.85,.8); geometry.translate(0,-.045,0)
+  const wood = new Mesh(geometry, new MeshStandardMaterial({color:'#b98752',roughness:.48,transparent:true}))
+  wood.castShadow = true; wood.receiveShadow = true
+  group.add(wood)
+  const curve = new CatmullRomCurve3([[0,-.11,0],[0,-.025,0],[0,.005,-.022],[0,.027,-.014],[0,.027,.007],[0,.010,.013]].map(p=>new Vector3(...p)))
+  const hook = new Mesh(new TubeGeometry(curve,32,.0035,8,false),new MeshStandardMaterial({color:'#a59b86',metalness:.9,roughness:.26,transparent:true}))
+  group.add(hook)
+  return group
+}
 
 function StudioEnvironment({ lightMode }) {
   const { gl, scene, invalidate } = useThree()
@@ -46,6 +63,9 @@ function RackFocus({ input, reducedMotion, lightMode }) {
       factor = sign(factor) * max(abs(factor) - 0.28, 0.0);
       vec2 dofblur =`,
     )
+    // The stock Bokeh shader forces alpha to 1, which turns every blurred pixel into opaque black.
+    // Keeping the averaged alpha lets the page's wall show through the blurred rail and side shirts.
+    bokeh.materialBokeh.fragmentShader = bokeh.materialBokeh.fragmentShader.replace('gl_FragColor.a = 1.0;', '')
     const output = new OutputPass()
     composer.addPass(render)
     composer.addPass(bokeh)
@@ -131,6 +151,8 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
       garment.name = `RackGarment_${i}`
       garment.position.set(0, 0, 0)
       garment.rotation.set(0, Math.PI / 2, 0)
+      const oldHanger = garment.children.find(child => child.name.startsWith('Hanger'))
+      if (oldHanger) { garment.remove(oldHanger); garment.add(woodenHanger()) }
       const flex = { value: 0 }
       garment.traverse((child) => {
         if (!child.isMesh) return
@@ -195,7 +217,7 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
       if (reducedMotion) { state.value = target; state.velocity = 0 }
       else if (spring(state, target, dt, stiffness, damping)) settling = true
     }
-    if (!control.dragging) advance(control.slide, control.target, 150, 24)
+    if (!control.dragging) advance(control.slide, control.target, 125, 23)
     if (!control.spinning) advance(control.turn, control.turnTarget, 65, 12)
     advance(control.drop, control.pull, 170, 23)
     motion.current.forEach((m, i) => advance(m.reveal, opened && i === selected ? 1 : 0, 52, 14))
@@ -215,7 +237,8 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
       const m = motion.current[i]
       const p = MathUtils.clamp(m.reveal.value, 0, 1)
       const distance = i - control.slide.value
-      const pose = stackPose(distance)
+      const sideCount = distance < 0 ? control.slide.value : GARMENT_COUNT - 1 - control.slide.value
+      const pose = stackPose(distance, sideCount)
       const away = smooth(.1, .8, reveal) * (1 - p)
       const side = Math.sign(distance || i - selected)
       const edge = side * (worldWidth / 2 + .03 + .17 * Math.max(0, Math.abs(distance) - 1))
@@ -223,7 +246,7 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
       const speed = m.initialized ? (x - m.previousX) / Math.max(dt, .001) : 0
       m.previousX = x
       m.initialized = true
-      advance(m.swing, MathUtils.clamp(-speed * .10, -.19, .19), 90, 15)
+      advance(m.swing, MathUtils.clamp(-speed * .065, -.10, .10), 90, 20)
       advance(m.pitch, MathUtils.clamp(-m.reveal.velocity * .075 + control.drop.velocity * .06, -.15, .15), 70, 10)
       advance(m.cloth, m.swing.value * .7 + m.pitch.value * .35 + MathUtils.clamp(control.turn.velocity * .009 * p, -.09, .09), 60, 13)
       flex.value = m.cloth.value
@@ -235,7 +258,7 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
         pose.turn * (1 - p) + (reducedMotion ? 0 : TAU * smooth(.12, 1, p)) + control.turn.value * p,
         m.swing.value + Math.sin(p * Math.PI) * .045,
       )
-      group.scale.setScalar(1 + forward * .65)
+      group.scale.set(1.32 + forward * .33, 1.12 + forward * .53, 1.32 + forward * .33)
       // Project each moving hem onto the floor; side-on garments cast narrower shadows.
       if (floor.current) {
         floor.current.material.uniforms.shadows.value[i].set(
@@ -253,11 +276,11 @@ function Rack({ lightMode, selected, opened, reducedMotion, active, input, wake,
       garment.visible = away < .999 || Math.abs(x) < worldWidth / 2 + .6
     })
     // Overscan a full viewport at either end so the original rail caps never appear.
-    models.rail.scale.x = Math.max(4, worldWidth * 3 / 5.3)
+    models.rail.scale.x = 4.6 / 5.3
     models.rail.scale.y = models.rail.scale.z = .55
     models.railViewport.value = size.width * gl.getPixelRatio()
     models.rail.material.opacity = 1 - smooth(.05, .7, reveal)
-    const lightOpacity = models.rail.material.opacity * (lightMode ? 0 : 1)
+    const lightOpacity = 0
     if (floor.current) { floor.current.visible = lightMode; floor.current.material.uniforms.lightMode.value = lightMode ? 1 : 0 }
     if (floor.current) floor.current.material.uniforms.opacity.value = 1 - smooth(.02, .65, reveal)
     models.ledUniforms.opacity.value = lightOpacity
@@ -383,22 +406,36 @@ function ContextGuard() {
   return null
 }
 
+// Catches the shirts' shadows on the wall behind them. It is invisible except where a shadow falls, and the shadows fall the
+// same way as the sunlight in the rendered room (from the upper left), so the live shirts feel like they hang in that room.
+function ShadowWall({ lightMode }) {
+  return <mesh position={[0, -.7, -1.1]} receiveShadow>
+    <planeGeometry args={[6.2, 6]} />
+    <shadowMaterial transparent depthWrite={false} opacity={lightMode ? .16 : .24} color={lightMode ? '#5a3b22' : '#000000'} />
+  </mesh>
+}
+
 export default function RackCanvas(props) {
   return <div className="rack-canvas" aria-hidden="true">
     <Canvas shadows orthographic camera={{ position: [0, -.53, 6], zoom: 220, near: .1, far: 30 }}
       dpr={[1, 1.75]} frameloop={props.active ? 'demand' : 'never'}
-      gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       fallback={<span>Your browser cannot display the 3D rack.</span>}>
       <ContextGuard />
       <RackFocus input={props.input} reducedMotion={props.reducedMotion} lightMode={props.lightMode} />
       <ambientLight layers-mask={3} intensity={props.lightMode ? .15 : .035} />
       <hemisphereLight layers-mask={3} args={['#fff5e8', '#b8a58d', props.lightMode ? .4 : .20]} />
-      <directionalLight layers-mask={3} position={[-2, 3, 1.5]} intensity={props.lightMode ? 3 : 2.6} castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-.0003} shadow-normalBias={.025} shadow-camera-left={-3} shadow-camera-right={3} shadow-camera-top={2} shadow-camera-bottom={-3} shadow-camera-near={.1} shadow-camera-far={12} shadow-radius={3} color="#fff6e9" />
-      <directionalLight layers-mask={3} position={[3, 1, 2]} intensity={props.lightMode ? .8 : .35} color="#dce5f1" />
+      <directionalLight layers-mask={3} position={[-2, 3, 1.5]} intensity={props.lightMode ? 3 : 2.6} color={props.lightMode ? '#ffffff' : '#ffdcb4'} castShadow shadow-mapSize={[2048, 2048]} shadow-radius={12} shadow-bias={-.0003} shadow-normalBias={.025} shadow-camera-left={-3} shadow-camera-right={3} shadow-camera-top={2} shadow-camera-bottom={-3} shadow-camera-near={.1} shadow-camera-far={12}  />
+      <directionalLight layers-mask={3} position={[3, 1, 2]} intensity={props.lightMode ? .8 : .35} color={props.lightMode ? '#dce5f1' : '#f0cfa5'} />
       <directionalLight layers-mask={3} position={[1, 2, -2]} intensity={props.lightMode ? .8 : 2.1} color="#ffe2b8" />
+      <ShadowWall lightMode={props.lightMode} />
       <Suspense fallback={null}><StudioEnvironment lightMode={props.lightMode} /><Rack {...props} /></Suspense>
-      <Suspense fallback={null}><RackPlants input={props.input} lightMode={props.lightMode} /></Suspense>
-      {!props.lightMode && <StudioFloor input={props.input} />}
     </Canvas>
   </div>
 }
+
+
+
+
+
+

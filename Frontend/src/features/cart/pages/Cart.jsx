@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {useSelector} from 'react-redux/es/hooks/useSelector'
+import {useSelector} from 'react-redux'
 import {useCart} from '../hook/useCart.js'
 import { useEffect } from 'react'
 

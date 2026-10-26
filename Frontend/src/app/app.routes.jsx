@@ -11,6 +11,7 @@ import Cart from "../features/cart/pages/Cart";
 
 
 export const routes = createBrowserRouter([
+    { path: "/cart", element: <Protected><Cart/></Protected> },
 
     {
         path: "/",
@@ -46,13 +47,8 @@ export const routes = createBrowserRouter([
                 element: <Protected role="seller">
                     <SellerProductDetail/>
                 </Protected>
-            },
-            {
-                path: "/cart",
-                element: <Protected>
-                    <Cart/>
-                </Protected>
             }
         ]
     },
 ])
+

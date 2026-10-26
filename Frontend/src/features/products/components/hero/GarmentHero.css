@@ -1,19 +1,20 @@
 .shop-home .home-main { max-width: none; padding: 0 0 80px; display: grid; grid-template-columns: minmax(0, 1fr); }
 .shop-home .home-header { max-width: none; background: #000; color: #f5f5f2; border-bottom: 0; }
 .shop-home .home-collection { width: 88%; min-width: 0; max-width: 1268px; margin-inline: auto; }
-.shop-home .rack-hero { display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; min-height: max(600px, calc(100svh - 94px)); padding: 30px 6% 26px; margin: 0 0 40px; background: #000; color: #f5f5f2; overflow: hidden; gap: 0; }
-.rack-heading { position: absolute; inset: 25px 6% auto; text-align: center; pointer-events: none; z-index: 2; }
+.shop-home .rack-hero { display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; min-height: max(700px, 100svh); padding: 0; margin: 0 0 40px; container-type: size; background: #1a110b; color: #f5f5f2; overflow: hidden; gap: 0; }
+.rack-heading { position: absolute; top: calc(var(--sh) * .435 - 34px); left: 6%; right: 6%; text-align: center; pointer-events: none; z-index: 2; }
 .shop-home .rack-hero h1 { margin: 0; font-size: clamp(30px, 3.5vw, 62px); font-weight: 500; line-height: 1.1; letter-spacing: -.055em; }
-.rack-stage { position: absolute; inset: 130px 0 25px; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; transition: top .85s cubic-bezier(.22, 1, .36, 1), bottom .85s cubic-bezier(.22, 1, .36, 1); }
-.rack-stage.is-open { top: 20px; bottom: 155px; }
+.rack-stage { position: absolute; z-index: 1; left: 50%; width: min(var(--sw), 100cqw); transform: translateX(-50%); top: calc(var(--sh) * .4616); bottom: calc(100cqh - var(--sh) * .8734); cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; transition: top .85s cubic-bezier(.22, 1, .36, 1), bottom .85s cubic-bezier(.22, 1, .36, 1), left .85s cubic-bezier(.22, 1, .36, 1), width .85s cubic-bezier(.22, 1, .36, 1), transform .85s cubic-bezier(.22, 1, .36, 1); }
+.rack-stage.is-open { left: 0; width: 100%; transform: none; top: 20px; bottom: 155px; }
 .rack-stage.is-dragging { cursor: grabbing; }
 .rack-stage:focus-visible { outline: 1px solid #5a5a54; outline-offset: -5px; }
 .rack-stage.is-open, .rack-stage.is-open canvas { touch-action: none !important; }
-.rack-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+/* Placeholder shown while the 3D loads: sized so its rail and shirts land roughly where the 3D ones will. */
+.rack-poster { position: absolute; top: -56.5%; left: 50%; width: auto; max-width: none; height: 199%; transform: translateX(-50%); object-fit: contain; pointer-events: none; }
 .rack-stage.is-ready .rack-poster { visibility: hidden; }
-.rack-canvas { position: absolute; inset: 0; }
+.rack-canvas { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(#000 0, #000 80%, transparent 100%); mask-image: linear-gradient(#000 0, #000 80%, transparent 100%); }
 .rack-canvas canvas { touch-action: pan-y !important; }
-.rack-selection { position: absolute; z-index: 2; bottom: 90px; left: 6%; right: 6%; }
+.rack-selection { position: absolute; z-index: 2; bottom: 12%; left: 6%; right: 6%; }
 .rack-picker { display: flex; align-items: center; justify-content: center; gap: clamp(120px, 28vw, 400px); }
 .is-preview .rack-selection { top: 44%; bottom: auto; }
 .is-preview .rack-picker { max-width: 760px; margin: auto; justify-content: space-between; gap: 0; }
@@ -33,12 +34,10 @@
 @media (max-width: 700px) {
   .shop-home .home-main { padding-bottom: 50px; }
   .shop-home .home-collection { width: 90%; }
-  .shop-home .rack-hero { min-height: max(690px, calc(100svh - 88px)); margin-bottom: 28px; padding: 22px 5%; }
-  .rack-heading { inset: 29px 5% auto; }
+  .shop-home .rack-hero { min-height: max(700px, 100svh); margin-bottom: 28px; padding: 0; }
+  .rack-heading { top: calc(var(--sh) * .435 - 30px); left: 5%; right: 5%; }
   .shop-home .rack-hero h1 { font-size: clamp(28px, 7.5vw, 43px); }
-  .rack-stage { inset: 118px 0 55px; }
   .rack-stage.is-open { top: 24px; bottom: 155px; }
-  .rack-poster { width: 260%; max-width: none; left: -80%; }
   .rack-picker { gap: 150px; }
   .rack-preview-info { bottom: auto; top: min(calc(100% - 135px), calc(50% - 35px + 52.63vw)); }
 }
@@ -47,15 +46,54 @@
 .rack-hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 52%, rgba(125, 92, 54, .055), transparent 65%); transition: opacity .5s ease; }
 .rack-hero.is-preview::before { opacity: 0; }
 
-.shop-home[data-theme='light'] .rack-hero { background: #f4efe7; color: #171511; }
-.shop-home[data-theme='light'] .rack-hero::before { background: radial-gradient(ellipse at 24% 20%, #fffdf8cc, transparent 65%), linear-gradient(105deg, #d4c8b62b, transparent 45%, #c5b7a51c); }
-.shop-home[data-theme='light'] .rack-hero::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url('/images/daylight-shadows.svg') center / 100% 100% no-repeat; opacity: 1; transition: opacity .4s ease; }
+.shop-home[data-theme='light'] .rack-hero { background: #ecdcc8; color: #171511; }
 .shop-home[data-theme='light'] .rack-stage { z-index: 1; }
-.shop-home[data-theme='light'] .rack-hero.is-preview::after { opacity: 0; }
 .shop-home[data-theme='light'] .rack-arrow { color: #28241e; border-color: #a99f91; background: #f4efe733; }
 .shop-home[data-theme='light'] .rack-arrow:hover:not(:disabled) { background: #e6ddd0; border-color: #72675b; }
 .shop-home[data-theme='light'] .rack-preview-info { z-index: 2; }
 .shop-home[data-theme='light'] .rack-preview-info p, .shop-home[data-theme='light'] .rack-preview-close { color: #665c50; }
 .shop-home[data-theme='light'] .rack-preview-close:hover { color: #171511; }
 .shop-home[data-theme='light'] :is(button,a):focus-visible { outline-color: #80532c; }
-@media(prefers-reduced-motion: reduce) { .rack-hero::before, .rack-hero::after { transition: none !important; } }
+@media(prefers-reduced-motion: reduce) { .rack-hero::before { transition: none !important; } }
+
+/* ---- The room: wall, floor, ceiling rack and bulbs are a Cycles render (see /blender); only the shirts are live 3D ----
+   The render is 2:1. --sw/--sh is the size it is drawn at so it covers the hero. The heading and the live shirt stage are
+   positioned from the same box, so they always line up with it. */
+.rack-hero > :is(.room, .rack-stage, .rack-heading) { --sw: min(max(100cqw, calc(100cqh * 2)), calc(100cqh * 2.2)); --sh: calc(var(--sw) / 2); }
+.room { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; transition: opacity .7s ease, filter .7s ease; }
+.room-img, .room-bulbs { position: absolute; left: 50%; top: 0; width: var(--sw); height: var(--sh); max-width: none; transform: translateX(-50%); }
+.room-img { opacity: 0; transition: opacity .6s ease; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.shop-home[data-theme='dark'] .room-dark, .shop-home[data-theme='light'] .room-light { opacity: 1; }
+.is-preview .room { opacity: .4; filter: blur(7px) saturate(.85); }
+.room-bulbs { opacity: 0; transition: opacity .6s ease; mix-blend-mode: screen; }
+.shop-home[data-theme='dark'] .room-bulbs { opacity: 1; }
+.room-bulbs i { position: absolute; width: calc(var(--sh) * .17); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(255, 178, 96, .36) 0%, rgba(255, 140, 52, .12) 40%, transparent 70%); animation: bulb-flicker 7s ease-in-out infinite; }
+.room-bulbs i:nth-child(1) { left: 28.99%; top: 30.26%; animation-duration: 6.3s; }
+.room-bulbs i:nth-child(2) { left: 33.91%; top: 29.89%; animation-duration: 8.1s; animation-delay: -2.2s; }
+.room-bulbs i:nth-child(3) { left: 47.49%; top: 30.78%; animation-duration: 7.4s; animation-delay: -4.1s; }
+.room-bulbs i:nth-child(4) { left: 54.77%; top: 30.88%; animation-duration: 9.2s; animation-delay: -1.3s; }
+.room-bulbs i:nth-child(5) { left: 71.95%; top: 30.26%; animation-duration: 6.9s; animation-delay: -5.4s; }
+@keyframes bulb-flicker { 0%, 100% { opacity: .9; } 18% { opacity: .78; } 21% { opacity: .96; } 47% { opacity: .84; } 72% { opacity: 1; } 75% { opacity: .8; } }
+@media (prefers-reduced-motion: reduce) { .room, .room-img, .room-bulbs { transition: none; } .room-bulbs i { animation: none; opacity: .9; } }
+
+/* The header floats over the wall, so the rack's rods run up behind the logo and nav. */
+.shop-home { position: relative; }
+.shop-home[data-theme] header.home-header { position: absolute; top: 0; left: 0; right: 0; z-index: 6; background: transparent; }
+
+/* Match the approved room composition without changing the interactive preview. */
+.shop-home .rack-hero h1 { font-weight: 400; font-size: clamp(30px, 3.6vw, 62px); letter-spacing: -.05em; }
+.room-img { -webkit-mask-image: none; mask-image: none; }
+.rack-picker { gap: clamp(150px, 13vw, 220px); }
+.rack-arrow { width: 58px; height: 58px; border-color: #d4c8b2; }
+.rack-selection { bottom: 10%; }
+.shop-home[data-theme='light'] .rack-arrow { border-color: #332e26; background: transparent; }
+.shop-home .home-brand .celestial-logo { width: 168px; height: 90px; }
+.shop-home .home-header { padding-top: 30px; }
+.shop-home .home-header nav { font-size: 14px; }
+@media (max-width: 700px) {
+ .shop-home .home-brand .celestial-logo { width: 104px; height: 56px; }
+ .rack-arrow { width: 46px; height: 46px; }
+ .rack-picker { gap: 150px; }
+}
+
+.shop-home:has(.rack-hero.is-preview) .home-header { pointer-events: none; }

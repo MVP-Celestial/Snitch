@@ -1,6 +1,5 @@
 export const GARMENTS = [
   { name: 'Navy', source: 3, color: '#364b66' },
-  { name: 'Burgundy', source: 3, color: '#663f4e' },
   { name: 'Chalk', source: 0 },
   { name: 'Olive', source: 1 },
   { name: 'Slate', source: 2 },
@@ -8,7 +7,6 @@ export const GARMENTS = [
   { name: 'Sand', source: 4 },
   { name: 'Forest', source: 5 },
   { name: 'Clay', source: 6 },
-  { name: 'Ash', source: 0, color: '#a6a8a4' },
   { name: 'Espresso', source: 3, color: '#574238' },
 ]
 export const GARMENT_COUNT = GARMENTS.length
@@ -63,10 +61,17 @@ export function spring(state, target, delta, stiffness = 190, damping = 24) {
   return state.value !== target || state.velocity !== 0
 }
 
-export function stackPose(distance) {
+// Redistribute each side within a fixed rail instead of translating shirts past its caps.
+// The selected tee stays centered; a fuller side packs more closely and turns slightly.
+export function stackPose(distance, sideCount = 4) {
+  const count = Math.max(4, sideCount)
+  const travel = Math.min(Math.abs(distance) / count, 1)
   return {
-    x: .17 * distance + .35 * Math.tanh(distance * 2.8),
-    turn: Math.sign(distance) * 1.27 * smooth(0, .88, Math.abs(distance)),
+    x: Math.sign(distance) * (.46 * Math.tanh(Math.abs(distance) * 2.8) + 1.38 * travel),
+    turn: Math.sign(distance) * (1.04 + .12 * smooth(4, 8, count)) * smooth(0, .88, Math.abs(distance)),
     z: -.035 * Math.min(Math.abs(distance), 4),
   }
 }
+
+
+

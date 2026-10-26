@@ -115,6 +115,11 @@ export default function GarmentHero({ lightMode = false }) {
     wake.current()
   }
   return <section className={`home-hero rack-hero ${opened ? 'is-preview' : ''}`} aria-labelledby={opened ? 'rack-preview-title' : 'home-title'}>
+    <div className="room" aria-hidden="true">
+      <img className="room-img room-dark" src={`${import.meta.env.BASE_URL}images/hero-room-dark.webp`} width="2400" height="1200" alt="" decoding="async" fetchPriority={lightMode ? 'low' : 'high'} />
+      <img className="room-img room-light" src={`${import.meta.env.BASE_URL}images/hero-room-light.webp`} width="2400" height="1200" alt="" decoding="async" fetchPriority={lightMode ? 'high' : 'low'} />
+      <div className="room-bulbs"><i /><i /><i /><i /><i /></div>
+    </div>
     <div className="rack-heading" aria-hidden={opened}><h1 id="home-title">Find your next favourite.</h1></div>
     <div ref={stage} className={`rack-stage ${ready ? 'is-ready' : ''} ${dragging ? 'is-dragging' : ''} ${opened ? 'is-open' : ''}`}
       role="group" aria-label={opened ? 'Shirt preview. Drag to rotate. Press Escape to return.' : 'Clothing rack. Swipe or use arrow keys to browse. Click a shirt or press Enter to preview.'} tabIndex={0}
