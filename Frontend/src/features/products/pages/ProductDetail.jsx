@@ -106,7 +106,7 @@ export default function ProductDetail() {
     setIsAddingToCart(true)
     setCartMessage('')
     try {
-      await handleAddItem({ productId, variantId })
+      await handleAddItem(productId, variantId)
       setCartMessage('Added to cart.')
     } catch (error) {
       setCartMessage(error.response?.data?.message || 'Could not add this product to your cart.')
@@ -132,7 +132,7 @@ export default function ProductDetail() {
             {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
             <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
-          <Link to="/#collection">Shop collection</Link>
+          <Link to="/#collection">Shop collection</Link><Link to="/cart">Your bag</Link>
         </nav>
       </header>
 
@@ -180,3 +180,4 @@ export default function ProductDetail() {
     </div>
   )
 }
+

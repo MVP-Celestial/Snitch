@@ -1,0 +1,21 @@
+import React from 'react'
+
+import {useSelector} from 'react-redux'
+import {useCart} from '../hook/useCart.js'
+import { useEffect } from 'react'
+
+const Cart = () => {
+ const cartItems = useSelector((state) => state.cart.items)
+ const {handleGetCart} = useCart()
+ console.log(cartItems)
+ //make sure to use handleIncrementCart Item function 
+ useEffect(() => {
+    handleGetCart()
+ }, [])
+
+  return (
+    <div>Cart</div>
+  )
+}
+
+export default Cart

@@ -67,6 +67,7 @@ export default function Home() {
             <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
           <a href="#collection" className="home-nav-shop">Shop collection</a>
+          {user?.role === 'buyer' && <Link to="/cart">Your bag</Link>}
           {user?.role === 'seller' ? <Link to="/seller/dashboard">Seller dashboard<ArrowUpRight size={15} aria-hidden="true" /></Link>
             : !user && <Link to="/login" className="home-sign-in">Sign in</Link>}
         </nav>
@@ -102,3 +103,4 @@ export default function Home() {
     </div>
   )
 }
+

@@ -1,3 +1,4 @@
+import CartTransition from '../features/cart/components/CartTransition'
 import './App.css'
 import { RouterProvider } from 'react-router'
 import {routes} from './app.routes'
@@ -16,8 +17,9 @@ function App() {
      },[])
       
 
-     return <RouterProvider router={routes} /> 
+     return <CartTransition router={routes}><RouterProvider router={routes} /></CartTransition> 
     }
 
 export default App
 // 
+

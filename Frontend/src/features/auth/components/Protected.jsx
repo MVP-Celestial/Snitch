@@ -1,32 +1,11 @@
-import {useSelector} from "react-redux"
-import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux'
+import { Navigate, useLocation } from 'react-router-dom'
 
-const Protected = ({children, role="buyer"}) => {
-    const user = useSelector(state => state.auth.user)
-    const loading = useSelector(state => state.auth.loading)
-    const navigate = useNavigate()
-
-    if(loading) {
-        return <div>Loading...</div>
-    }
-
-    if(!user) {
-      navigate("/login")
-      
-    }
-
-    if(user.role !== role) {
-        return <navigate to="/" />
-    }
-
-
-
-
-
-
-
+export default function Protected({ children, role = 'buyer' }) {
+  const { user, loading } = useSelector(state => state.auth)
+  const location = useLocation()
+  if (loading) return <div role="status" style={{ padding: '64px', textAlign: 'center' }}>Loading your account…</div>
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  if (user.role !== role) return <Navigate to="/" replace />
   return children
-  
 }
-
-export default Protected
